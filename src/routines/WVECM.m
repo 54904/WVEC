@@ -54,20 +54,17 @@ LIST ; Build display
  D SILENT^%RSEL("*","SRC")
 
  N START,FOUND
-
  S START=$G(^TMP($J,"WVECM","START"))
  S N=0
- S FOUND=0
- S X=""
 
- F  S X=$O(%ZR(X)) Q:X=""  D
- . I 'FOUND,X=START S FOUND=1
- . Q:'FOUND
+ I START'="",$D(%ZR(START)) S X=$O(%ZR(START),-1)
+ E  S X=""
+
+ F  S X=$O(%ZR(X)) Q:X=""!(N'<500)  D
  . S N=N+1
  . D ADDITEM^WVECWS(N,X,"","R",X)
 
  D SETSTATE^WVECWS("COUNT",N)
-
  Q
 
 BUILD ; Build Workspace
