@@ -1,5 +1,6 @@
 WVECM ; WorldVistA M Explorer
  ;;1.1;WORLDVISTA ENGINEERING CONSOLE;;
+
 INIT ; Initialize Explorer
  ;
  N RTN,X
@@ -20,6 +21,7 @@ INIT ; Initialize Explorer
  ;
  D TOP
  Q
+
 TOP ; Return to top level
  ;
  N START
@@ -44,6 +46,7 @@ LIST ; Build display
  I MODE="MENU" D MENU Q
  I MODE="LABELS" D LABELS Q
  I MODE="SOURCE" D SOURCE Q
+ I MODE="CALLS" D CALLS Q
  ;
  D CLEAR^WVECWS
  K %ZR
@@ -66,6 +69,7 @@ LIST ; Build display
  D SETSTATE^WVECWS("COUNT",N)
 
  Q
+
 BUILD ; Build Workspace
  D LIST
  Q
@@ -89,7 +93,7 @@ OPEN(NUMBER) ; Open Selected Item
  I MODE="MENU" D  Q
  . I ITEM="Labels" S ^TMP($J,"WVECM","MODE")="LABELS" D LIST Q
  . I ITEM="Source" S ^TMP($J,"WVECM","LABEL")="" S ^TMP($J,"WVECM","MODE")="SOURCE" D LIST Q
- . I ITEM="Calls" W !!,"Calls not implemented yet." R !!,"Press RETURN: ",X D LIST Q
+ . I ITEM="Calls" S ^TMP($J,"WVECM","MODE")="CALLS" D LIST Q
  . I ITEM="Globals" W !!,"Globals not implemented yet." R !!,"Press RETURN: ",X D LIST Q
  . I ITEM="Variables" W !!,"Variables not implemented yet." R !!,"Press RETURN: ",X D LIST Q
  . I ITEM="Metrics" W !!,"Metrics not implemented yet." R !!,"Press RETURN: ",X D LIST Q
@@ -98,6 +102,13 @@ OPEN(NUMBER) ; Open Selected Item
  I MODE="LABELS" D  Q
  . S ^TMP($J,"WVECM","LABEL")=ITEM
  . S ^TMP($J,"WVECM","MODE")="SOURCE"
+ . D LIST
+ ;
+ ; ----- Calls -----
+ I MODE="CALLS" D  Q
+ . S ^TMP($J,"WVECM","ROUTINE")=ITEM
+ . K ^TMP($J,"WVECM","LABEL")
+ . S ^TMP($J,"WVECM","MODE")="MENU"
  . D LIST
  ;
  Q
@@ -113,6 +124,10 @@ UP ; Navigate Up
  ;
  I MODE="SOURCE" D  Q
  . S ^TMP($J,"WVECM","MODE")="LABELS"
+ . D LIST
+ ;
+ I MODE="CALLS" D  Q
+ . S ^TMP($J,"WVECM","MODE")="MENU"
  . D LIST
  ;
  I MODE="LABELS" D  Q
@@ -155,6 +170,12 @@ HEADER ; Display Header
  I MODE="LABELS" D  Q
  . S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
  . W !,"Location : Labels"
+ . W !,"Routine  : ",RTN
+ . W !
+ ;
+ I MODE="CALLS" D  Q
+ . S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
+ . W !,"Location : Calls"
  . W !,"Routine  : ",RTN
  . W !
  ;
@@ -210,6 +231,44 @@ LABELS ; Build Label List
  . D ADDITEM^WVECWS(CNT,LAB,"","L","")
  ;
  D SETSTATE^WVECWS("TITLE","Labels: "_RTN)
+ D SETSTATE^WVECWS("COUNT",CNT)
+ ;
+ Q
+CALLS ; Build Call List
+ ;
+ N RTN,I,LINE,CNT,X
+ N SEEN,NAME
+ ;
+ S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
+ ;
+ D CLEAR^WVECWS
+ ;
+ K SEEN
+ S CNT=0
+ ;
+ F I=1:1 D  Q:LINE=""
+ . S LINE=$T(+I^@RTN)
+ . Q:LINE=""
+ . I LINE["^" D
+ . . S NAME=$P(LINE,"^",2)
+ . . S NAME=$P(NAME," ")
+ . . S NAME=$P(NAME,",")
+ . . S NAME=$P(NAME,")")
+ . . S NAME=$P(NAME,"(")
+ . . S NAME=$P(NAME,";")
+ . . Q:NAME=""
+ . . Q:NAME["$"
+ . . Q:NAME[""""
+ . . Q:NAME["*"
+ . . S X=NAME
+ . . X ^%ZOSF("TEST")
+ . . Q:'$T
+ . . Q:$D(SEEN(NAME))
+ . . S SEEN(NAME)=""
+ . . S CNT=CNT+1
+ . . D ADDITEM^WVECWS(CNT,NAME,"","C",NAME)
+ ;
+ D SETSTATE^WVECWS("TITLE","Calls: "_RTN)
  D SETSTATE^WVECWS("COUNT",CNT)
  ;
  Q
