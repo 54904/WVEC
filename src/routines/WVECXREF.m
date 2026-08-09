@@ -1,63 +1,105 @@
-WVECXREF ; WVEC XINDEX Explorer
+WVECXREF ; WVEC XINDEX Analysis Service
  ;;1.0;WORLDVISTA ENGINEERING CONSOLE;;
 
+ Q
+
 TEST ;
- N RTN,RTNNM,X,Y
+ N RTN
 
  R !,"Routine: ",RTN:300
  Q:RTN=""
 
- S RTNNM=RTN
+ D ANALYZE(RTN)
+
+ D REPORT(RTN)
+
+ Q
+ANALYZE(RTN) ;
+ N ROU
+
+ S ROU=RTN
+ Q:ROU=""
 
  K ^UTILITY($J)
+ K ^TMP($J,"XREF")
 
- ; Build routine list for XINDEX
- S ^UTILITY($J,RTN)=""
+ S ^UTILITY($J,ROU)=""
 
- ; Initialize XINDEX environment
  D PARAM^XINDX6
  D HDR^XINDX7
  D BUILD^XINDX7
  D SETUP^XINDX7
 
- ; Analyze selected routine
- S RTN="$"
- F  S RTN=$O(^UTILITY($J,RTN)) Q:RTN=""  D
- . S INDLC=0
- . D LOAD^XINDEX
- . D BEG^XINDEX
+ S INDLC=0
+ S INP(11)=""
+ S INP(12)=""
+
+ S RTN=ROU
+
+ D LOAD^XINDEX
+ D BEG^XINDEX
+
+ D EXTRACT(ROU)
+ Q
+
+EXTRACT(RTN) ;
+ N X
+
+ ; Metrics
+ S ^TMP($J,"XREF","METRICS")=$G(^UTILITY($J,1,RTN,0))
+
+ ; Tags
+ S X=""
+ F  S X=$O(^UTILITY($J,1,RTN,"T",X)) Q:X=""  D
+ . S ^TMP($J,"XREF","TAG",X)=""
+
+ ; External Calls
+ S X=""
+ F  S X=$O(^UTILITY($J,1,RTN,"X",X)) Q:X=""  D
+ . S ^TMP($J,"XREF","CALL",X)=$G(^UTILITY($J,1,RTN,"X",X,0))
+
+ ; Globals
+ S X=""
+ F  S X=$O(^UTILITY($J,1,RTN,"G",X)) Q:X=""  D
+ . S ^TMP($J,"XREF","GLOBAL",X)=$G(^UTILITY($J,1,RTN,"G",X,0))
+
+ ; Locals
+ S X=""
+ F  S X=$O(^UTILITY($J,1,RTN,"L",X)) Q:X=""  D
+ . S ^TMP($J,"XREF","LOCAL",X)=$G(^UTILITY($J,1,RTN,"L",X,0))
+
+ Q
+
+REPORT(RTN) ;
+ N X
 
  W !!,"=== SUMMARY ===",!
 
- ; Metrics
  W !,"Metrics:"
- W !,$G(^UTILITY($J,1,RTNNM,0))
+ W !,$G(^TMP($J,"XREF","METRICS"))
 
- ; Tags
  W !!,"Tags:"
  S X=""
- F  S X=$O(^UTILITY($J,1,RTNNM,"T",X)) Q:X=""  W !?2,X
+ F  S X=$O(^TMP($J,"XREF","TAG",X)) Q:X=""  W !,X
 
- ; External Calls
  W !!,"External Calls:"
  S X=""
- F  S X=$O(^UTILITY($J,1,RTNNM,"X",X)) Q:X=""  D
- . W !?2,X
- . W " -> ",$G(^UTILITY($J,1,RTNNM,"X",X,0))
+ F  S X=$O(^TMP($J,"XREF","CALL",X)) Q:X=""  D
+ . W !,X
+ . W " -> ",$G(^TMP($J,"XREF","CALL",X))
 
- ; Globals
  W !!,"Globals:"
  S X=""
- F  S X=$O(^UTILITY($J,1,RTNNM,"G",X)) Q:X=""  D
- . W !?2,X
- . W " -> ",$G(^UTILITY($J,1,RTNNM,"G",X,0))
+ F  S X=$O(^TMP($J,"XREF","GLOBAL",X)) Q:X=""  D
+ . W !,X
+ . W " -> ",$G(^TMP($J,"XREF","GLOBAL",X))
 
- ; Locals
  W !!,"Locals:"
  S X=""
- F  S X=$O(^UTILITY($J,1,RTNNM,"L",X)) Q:X=""  D
- . W !?2,X
- . W " -> ",$G(^UTILITY($J,1,RTNNM,"L",X,0))
+ F  S X=$O(^TMP($J,"XREF","LOCAL",X)) Q:X=""  D
+ . W !,X
+ . W " -> ",$G(^TMP($J,"XREF","LOCAL",X))
 
  W !!
+
  Q
