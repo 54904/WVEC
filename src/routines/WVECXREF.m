@@ -103,3 +103,37 @@ REPORT(RTN) ;
  W !!
 
  Q
+TAGS(RTN) ;
+ N X
+
+ D ANALYZE(RTN)
+
+ S X=""
+ F  S X=$O(^TMP($J,"XREF","TAG",X)) Q:X=""  W !,X
+
+ Q
+TAGLIST(RTN,LIST,COUNT) ;
+ N X
+
+ K LIST
+ S COUNT=0
+
+ D ANALYZE(RTN)
+
+ S X=""
+ F  S X=$O(^TMP($J,"XREF","TAG",X)) Q:X=""  D
+ . S COUNT=COUNT+1
+ . S LIST(COUNT)=X
+
+ Q
+LABELLINE(RTN,LABEL) ;
+ N I,TXT,FOUND
+
+ S FOUND=0
+
+ F I=1:1 Q:$T(+I^@RTN)=""  D
+ . S TXT=$P($T(+I^@RTN)," ")
+ . S TXT=$P(TXT,"(")
+ . I TXT=LABEL S FOUND=I
+
+ Q FOUND
