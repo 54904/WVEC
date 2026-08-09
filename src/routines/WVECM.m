@@ -294,3 +294,27 @@ SOURCE ; Display Source
  D SETSTATE^WVECWS("COUNT",CNT)
  ;
  Q
+FIND ; Find Text
+
+ N TEXT,I,X,MATCH,PAGE
+
+ Q:$G(^TMP($J,"WVECM","MODE"))'="SOURCE"
+
+ R !!,"Find: ",TEXT:300
+
+ Q:TEXT=""
+
+ S TEXT=$$UP^XLFSTR(TEXT)
+ S MATCH=0
+
+ F I=1:1:$$COUNT^WVECWS() D  Q:MATCH
+ . S X=$$DISPLAY^WVECWS(I)
+ . I $$UP^XLFSTR(X)[TEXT S MATCH=I
+
+ I 'MATCH W !,"Not found." H 2 Q
+
+ S PAGE=((MATCH-1)\$$SIZE^WVECNAV())+1
+
+ D SETPAGE^WVECNAV(PAGE)
+
+ Q
