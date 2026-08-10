@@ -105,6 +105,19 @@ REPORT(RTN) ;
  Q
 TAGS(RTN) ;
  N X
+CALLS(RTN) ;
+ N X
+
+ D ANALYZE(RTN)
+
+ W !!,"Calls from ",RTN,!!
+
+ S X=""
+ F  S X=$O(^TMP($J,"XREF","CALL",X)) Q:X=""  D
+ . W !,X
+
+ W !!
+ Q
 
  D ANALYZE(RTN)
 
@@ -126,6 +139,21 @@ TAGLIST(RTN,LIST,COUNT) ;
  . S LIST(COUNT)=X
 
  Q
+CALLLIST(RTN,LIST,COUNT) ;
+ N X
+
+ K LIST
+ S COUNT=0
+
+ D ANALYZE(RTN)
+
+ S X=""
+ F  S X=$O(^TMP($J,"XREF","CALL",X)) Q:X=""  D
+ . S COUNT=COUNT+1
+ . S LIST(COUNT)=X
+
+ Q
+
 LABELLINE(RTN,LABEL) ;
  N I,TXT,FOUND
 
@@ -137,3 +165,16 @@ LABELLINE(RTN,LABEL) ;
  . I TXT=LABEL S FOUND=I
 
  Q FOUND
+DUMPTAGS(RTN) ;
+ N X
+
+ D ANALYZE(RTN)
+
+ W !!,"=== RAW TAG DATA ===",!
+
+ S X=""
+ F  S X=$O(^UTILITY($J,1,RTN,"T",X)) Q:X=""  D
+ . W !!,"TAG=",X
+ . ZW ^UTILITY($J,1,RTN,"T",X)
+
+ Q

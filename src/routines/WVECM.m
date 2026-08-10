@@ -224,40 +224,19 @@ LABELS ; Build Label List
  D SETSTATE^WVECWS("COUNT",CNT)
  ;
  Q
-
 CALLS ; Build Call List
  ;
- N RTN,I,LINE,CNT,X
- N SEEN,NAME
+ N RTN,I,CNT,LIST
  ;
  S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
  ;
  D CLEAR^WVECWS
  ;
- K SEEN
  S CNT=0
+ D CALLLIST^WVECXREF(RTN,.LIST,.CNT)
  ;
- F I=1:1 D  Q:LINE=""
- . S LINE=$T(+I^@RTN)
- . Q:LINE=""
- . I LINE["^" D
- . . S NAME=$P(LINE,"^",2)
- . . S NAME=$P(NAME," ")
- . . S NAME=$P(NAME,",")
- . . S NAME=$P(NAME,")")
- . . S NAME=$P(NAME,"(")
- . . S NAME=$P(NAME,";")
- . . Q:NAME=""
- . . Q:NAME["$"
- . . Q:NAME[""""
- . . Q:NAME["*"
- . . S X=NAME
- . . X ^%ZOSF("TEST")
- . . Q:'$T
- . . Q:$D(SEEN(NAME))
- . . S SEEN(NAME)=""
- . . S CNT=CNT+1
- . . D ADDITEM^WVECWS(CNT,NAME,"","C",NAME)
+ F I=1:1:CNT D
+ . D ADDITEM^WVECWS(I,LIST(I),"","C",LIST(I))
  ;
  D SETSTATE^WVECWS("TITLE","Calls: "_RTN)
  D SETSTATE^WVECWS("COUNT",CNT)
