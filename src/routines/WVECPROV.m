@@ -108,4 +108,8 @@ INSPECT(PROVIDER) ; Inspect Current Node
  D UNKNOWN(PROVIDER)
 
  Q
+UNKNOWN(PROVIDER) ; Unknown Provider
 
+ W !!,"Unknown provider: ",$G(PROVIDER),!
+
+ Q
