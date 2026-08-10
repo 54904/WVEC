@@ -206,31 +206,25 @@ MENU ; Build routine menu
  D SETSTATE^WVECWS("COUNT",6)
  ;
  Q
-
 LABELS ; Build Label List
  ;
- N RTN,I,LINE,LAB,CNT
+ N RTN,I,CNT,LIST
  ;
  S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
  ;
  D CLEAR^WVECWS
  ;
  S CNT=0
+ D TAGLIST^WVECXREF(RTN,.LIST,.CNT)
  ;
- F I=1:1 D  Q:LINE=""
- . S LINE=$T(+I^@RTN)
- . Q:LINE=""
- . S LAB=$P(LINE," ")
- . S LAB=$P(LAB,"(")
- . Q:LAB=""
- . Q:$E(LAB)=";"
- . S CNT=CNT+1
- . D ADDITEM^WVECWS(CNT,LAB,"","L","")
+ F I=1:1:CNT D
+ . D ADDITEM^WVECWS(I,LIST(I),"","L","")
  ;
  D SETSTATE^WVECWS("TITLE","Labels: "_RTN)
  D SETSTATE^WVECWS("COUNT",CNT)
  ;
  Q
+
 CALLS ; Build Call List
  ;
  N RTN,I,LINE,CNT,X
