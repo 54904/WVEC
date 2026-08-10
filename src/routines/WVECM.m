@@ -101,15 +101,15 @@ OPEN(NUMBER) ; Open Selected Item
  . S ^TMP($J,"WVECM","MODE")="SOURCE"
  . D LIST
  ;
- ; ----- Calls -----
+; ----- Calls -----
  I MODE="CALLS" D  Q
- . S ^TMP($J,"WVECM","ROUTINE")=ITEM
+ . N RTN
+ . S RTN=$P(ITEM," ")
+ . S ^TMP($J,"WVECM","ROUTINE")=RTN
  . K ^TMP($J,"WVECM","LABEL")
  . S ^TMP($J,"WVECM","MODE")="MENU"
  . D LIST
- ;
  Q
-
 SELECT(NUMBER)
  Q 1
 
