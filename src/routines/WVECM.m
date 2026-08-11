@@ -137,6 +137,9 @@ UP ; Navigate Up
  . S ^TMP($J,"WVECM","MODE")="ROUTINES"
  . D LIST
  ;
+ I MODE="ROUTINES" D  Q
+ . S ^TMP($J,"WVECNAV","TYPE")="WVECEXP"
+ . D INIT^WVECEXP
  Q
 
 REFRESH
