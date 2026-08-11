@@ -107,12 +107,13 @@ OPEN(NUMBER) ; Open Selected Item
 ; ----- Calls -----
  I MODE="CALLS" D  Q
  . N RTN
- . S RTN=$P(ITEM," ")
+ . S RTN=$S(ITEM["^":$P(ITEM,"^",2),1:ITEM)
+ . Q:RTN=""
  . S ^TMP($J,"WVECM","ROUTINE")=RTN
  . K ^TMP($J,"WVECM","LABEL")
  . S ^TMP($J,"WVECM","MODE")="MENU"
  . D LIST
- Q
+ ;
 SELECT(NUMBER)
  Q 1
 
