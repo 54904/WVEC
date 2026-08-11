@@ -48,6 +48,7 @@ LIST ; Build display
  I MODE="SOURCE" D SOURCE Q
  I MODE="CALLS" D CALLS Q
  I MODE="GLOBALS" D GLOBALS Q
+ I MODE="VARIABLES" D VARIABLES Q
  ;
  D CLEAR^WVECWS
  K %ZR
@@ -93,7 +94,7 @@ OPEN(NUMBER) ; Open Selected Item
  . I ITEM="Source" S ^TMP($J,"WVECM","LABEL")="" S ^TMP($J,"WVECM","MODE")="SOURCE" D LIST Q
  . I ITEM="Calls" S ^TMP($J,"WVECM","MODE")="CALLS" D LIST Q
  . I ITEM="Globals" S ^TMP($J,"WVECM","MODE")="GLOBALS" D LIST Q
- . I ITEM="Variables" W !!,"Variables not implemented yet." R !!,"Press RETURN: ",X D LIST Q
+ . I ITEM="Variables" S ^TMP($J,"WVECM","MODE")="VARIABLES" D LIST Q
  . I ITEM="Metrics" W !!,"Metrics not implemented yet." R !!,"Press RETURN: ",X D LIST Q
  ;
  ; ----- Label List -----
@@ -132,6 +133,9 @@ UP ; Navigate Up
  . S ^TMP($J,"WVECM","MODE")="MENU"
  . D LIST
  I MODE="LABELS" D  Q
+ . S ^TMP($J,"WVECM","MODE")="MENU"
+ . D LIST
+ I MODE="VARIABLES" D  Q
  . S ^TMP($J,"WVECM","MODE")="MENU"
  . D LIST
  ;
@@ -196,6 +200,11 @@ HEADER ; Display Header
  . W !,"Routine  : ",RTN
  . W !
  ;
+ I MODE="VARIABLES" D  Q
+ . S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
+ . W !,"Location : Variables"
+ . W !,"Routine  : ",RTN
+ . W !
  W !,"Location : Unknown"
  Q
 
@@ -269,6 +278,24 @@ GLOBALS ; Build Global List
  . D ADDITEM^WVECWS(I,LIST(I),"","G",LIST(I))
  ;
  D SETSTATE^WVECWS("TITLE","Globals: "_RTN)
+ D SETSTATE^WVECWS("COUNT",CNT)
+ ;
+ Q
+VARIABLES ; Build Variable List
+ ;
+ N RTN,I,CNT,LIST
+ ;
+ S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
+ ;
+ D CLEAR^WVECWS
+ ;
+ S CNT=0
+ D VARLIST^WVECXREF(RTN,.LIST,.CNT)
+ ;
+ F I=1:1:CNT D
+ . D ADDITEM^WVECWS(I,LIST(I),"","V",LIST(I))
+ ;
+ D SETSTATE^WVECWS("TITLE","Variables: "_RTN)
  D SETSTATE^WVECWS("COUNT",CNT)
  ;
  Q
