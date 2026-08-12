@@ -5,6 +5,10 @@ INIT ; Initialize Explorer
  ;
  N RTN,X
  ;
+ I $G(^TMP($J,"WVECM","ROUTINE"))'="" D  Q
+ . S RTN=^TMP($J,"WVECM","ROUTINE")
+ . S ^TMP($J,"WVECM","START")=RTN
+ . D TOP
  F  D  Q:RTN]""
  . R !,"Routine: ",X:300
  . I X="^" S RTN="^" Q
@@ -104,16 +108,16 @@ OPEN(NUMBER) ; Open Selected Item
  . S ^TMP($J,"WVECM","MODE")="SOURCE"
  . D LIST
  ;
-; ----- Calls -----
  I MODE="CALLS" D  Q
- . N RTN
- . S RTN=$S(ITEM["^":$P(ITEM,"^",2),1:ITEM)
+ . N RTN,LBL
+ . S RTN=$P(ITEM," ")
+ . S LBL=$P(ITEM," ",2,99)
  . Q:RTN=""
  . S ^TMP($J,"WVECM","ROUTINE")=RTN
- . K ^TMP($J,"WVECM","LABEL")
+ . S ^TMP($J,"WVECM","LABEL")=LBL
  . S ^TMP($J,"WVECM","MODE")="MENU"
  . D LIST
- ;
+ Q
 SELECT(NUMBER)
  Q 1
 

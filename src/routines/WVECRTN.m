@@ -83,6 +83,43 @@ TEST ;
  . W $J(I,4),"  ",LIST(I),!
 
  Q
+BUILD ; Build Workspace
+ N CTX,LIST,COUNT,I
+
+ D CLEAR^WVECWS
+
+ S COUNT=0
+ D LIST(.CTX,.LIST,.COUNT)
+
+ F I=1:1:COUNT D
+ . D ADDITEM^WVECWS(I,LIST(I),"","R",LIST(I))
+
+ D SETSTATE^WVECWS("TITLE","Routine Explorer")
+ D SETSTATE^WVECWS("COUNT",COUNT)
+
+ Q
+OPEN(NUMBER) ; Open Selected Item
+ N RTN
+
+ S RTN=$$DISPLAY^WVECWS(NUMBER)
+ Q:RTN=""
+
+ S ^TMP($J,"WVECM","ROUTINE")=RTN
+ K ^TMP($J,"WVECM","LABEL")
+
+ S ^TMP($J,"WVECNAV","TYPE")="WVECM"
+
+ D INIT^WVECM
+ S ^TMP($J,"WVECNAV","DIRTY")=1
+ Q
+
+HEADER ; Display Header
+ W @IOF
+ W !,"============================================================"
+ W !,"                  Routine Explorer"
+ W !,"============================================================"
+ W !
+ Q
 
 VERSION() ;
  Q "1.1"
