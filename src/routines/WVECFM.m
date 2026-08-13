@@ -53,9 +53,14 @@ BUILD ; Build Workspace
  . . S NAME=$P(ZERO,U)
  . . Q:NAME=""
  . . S TYPE=$P(ZERO,U,2)
+ . .
  . . I TYPE?1.N.N.E,$D(^DD(+TYPE)) D
  . . . S SUBFILE=+TYPE
  . . . S NAME=NAME_" [MULTIPLE "_SUBFILE_"]"
+ . .
+ . . I TYPE["C" D
+ . . . S NAME=NAME_" [COMPUTED]"
+ . .
  . . S COUNT=COUNT+1
  . . D ADDITEM^WVECWS(COUNT,FIELD_"  "_NAME,"","FIELD",FIELD)
  . D SETSTATE^WVECWS("COUNT",COUNT)
@@ -75,12 +80,20 @@ BUILD ; Build Workspace
  . S COUNT=COUNT+1
  . D ADDITEM^WVECWS(COUNT,"Type: "_TYPE,"","PROP",TYPE)
  .
+ . I TYPE["C" D
+ . . S COUNT=COUNT+1
+ . . D ADDITEM^WVECWS(COUNT,"Computed: YES","","PROP","YES")
+ .
  . S LOC=$P(ZERO,U,4)
  . S COUNT=COUNT+1
  . D ADDITEM^WVECWS(COUNT,"Location: "_LOC,"","PROP",LOC)
  .
  . S COUNT=COUNT+1
  . D ADDITEM^WVECWS(COUNT,"Field Number: "_FIELD,"","PROP",FIELD)
+ .
+ . I TYPE["C",$D(^DD(FILE,FIELD,9.1)) D
+ . . S COUNT=COUNT+1
+ . . D ADDITEM^WVECWS(COUNT,"Show Computed Logic","","COMPUTED",FIELD)
  .
  . I TYPE?1"P".N.E D
  . . S TARGET=+$E(TYPE,2,99)
@@ -92,23 +105,6 @@ BUILD ; Build Workspace
  . . D ADDITEM^WVECWS(COUNT,"Open Subfile "_(+TYPE),"","SUBFILE",+TYPE)
  .
  . D SETSTATE^WVECWS("COUNT",COUNT)
-
- Q
- ;
-LIST(CTX,LIST,COUNT) ;
- N FILE,NAME,U
- S U="^"
-
- K LIST
- S COUNT=0
-
- I $G(CTX("MODE"))="FILES" D  Q
- . S FILE=0
- . F  S FILE=$O(^DIC(FILE)) Q:'FILE  D
- . . S NAME=$P($G(^DIC(FILE,0)),U)
- . . Q:NAME=""
- . . S COUNT=COUNT+1
- . . S LIST(COUNT)=FILE_" "_NAME
 
  Q
  ;
