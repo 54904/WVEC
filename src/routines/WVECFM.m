@@ -20,15 +20,9 @@ WVECFM ; WorldVistA FileMan Explorer Provider
 EN ;
  Q
  ;
-TITLE(CTX) ;
- Q "FileMan Explorer"
- ;
-INIT(CTX) ;
- K CTX("STACK")
- S CTX("LEVEL")=0
- S CTX("MODE")="FILES"
- S CTX("PAGE")=1
- K CTX("FILE")
+INIT ;
+ K ^TMP($J,"WVECNAV","FM")
+ S ^TMP($J,"WVECNAV","FM","MODE")="FILES"
  Q
  ;
 BUILD ; Build Workspace
@@ -101,9 +95,6 @@ LIST(CTX,LIST,COUNT) ;
  . . S COUNT=COUNT+1
  . . S LIST(COUNT)=FILE_" "_NAME
 
- Q
- ;
-SELECT(CTX,ITEM) ;
  Q
  ;
 UP ;

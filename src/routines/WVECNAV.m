@@ -187,21 +187,3 @@ DIRTY() ;
 SETDIRTY(VALUE) ;
  S ^TMP($J,"WVECNAV","DIRTY")=+VALUE
  Q
-GLOB ; Global Provider
- D INIT^WVECGLOB
- Q
-
-RTN ; Routine Provider
- D LIST^WVECRTN
- Q
-
-KIDS ; KIDS Provider
- D LIST^WVECKIDS
- Q
-
-FM ; FileMan Provider
- D LIST^WVECFM
- Q
-M ; M Explorer
- D INIT^WVECM
- Q
