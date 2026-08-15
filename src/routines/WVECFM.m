@@ -262,26 +262,45 @@ OPEN(NUMBER) ;
  Q
  ;
 FIND ; Find File or Field
+ N MODE,TEXT,UPTEXT,MATCH,POS,FILE,NAME,FIELD,ZERO
  ;
- N TEXT,I,X,MATCH,PAGE
- ;
+ S MODE=$G(^TMP($J,"WVECNAV","FM","MODE"),"FILES")
  R !!,"Find: ",TEXT:300
  Q:TEXT=""
  ;
- S TEXT=$$UP^XLFSTR(TEXT)
+ S UPTEXT=$$UP^XLFSTR(TEXT)
  S MATCH=0
+ S POS=0
  ;
- F I=1:1:$$COUNT^WVECWS() D  Q:MATCH
- . S X=$$DISPLAY^WVECWS(I)
- . I $$UP^XLFSTR(X)[TEXT S MATCH=I
+ I MODE="FILES" D  Q
+ . S FILE=0
+ . F  S FILE=$O(^DIC(FILE)) Q:'FILE  D  Q:MATCH
+ . . S NAME=$P($G(^DIC(FILE,0)),U)
+ . . Q:NAME=""
+ . . S POS=POS+1
+ . . I (FILE=+TEXT)!(NAME[UPTEXT) D
+ . . . S MATCH=FILE
+ . . . D SETPAGE^WVECNAV(((POS-1)\$$SIZE^WVECNAV())+1)
+ . I 'MATCH W !,"Not found." H 2
  ;
- I 'MATCH W !,"Not found." H 2 Q
+ I MODE="FIELDS" D  Q
+ . S FILE=+$G(^TMP($J,"WVECNAV","FM","FILE"))
+ . Q:'FILE
+ . S FIELD=0
+ . F  S FIELD=$O(^DD(FILE,FIELD)) Q:FIELD=""  D  Q:MATCH
+ . . Q:FIELD?1A.A
+ . . S ZERO=$G(^DD(FILE,FIELD,0))
+ . . S NAME=$P(ZERO,U)
+ . . Q:NAME=""
+ . . S POS=POS+1
+ . . I (FIELD=TEXT)!(NAME[UPTEXT) D
+ . . . S MATCH=FIELD
+ . . . D SETPAGE^WVECNAV(((POS-1)\$$SIZE^WVECNAV())+1)
+ . I 'MATCH W !,"Not found." H 2
  ;
- S PAGE=((MATCH-1)\$$SIZE^WVECNAV())+1
- ;
- D SETPAGE^WVECNAV(PAGE)
- ;
+ W !,"Find is not available in this mode." H 2
  Q
+
 REFBY(FILE) ; Count fields pointing to FILE
  N SRC,FLD,TYP,COUNT
 
