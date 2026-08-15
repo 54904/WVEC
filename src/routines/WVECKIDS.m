@@ -1,110 +1,139 @@
-WVECKIDS ; WorldVistA KIDS Explorer Provider
- ;;5.2;WORLDVISTA ENGINEERING CONSOLE;;
+WVECKIDS ; WVEC KIDS Explorer Provider
+ ;;3.0;WORLDVISTA ENGINEERING CONSOLE;;
  ;
- ;---------------------------------------------------------
- ; WorldVistA Engineering Console
- ;
- ; KIDS Explorer Provider
- ;
- ; Provider Interface
- ;   EN
- ;   TITLE()
- ;   INIT()
- ;   LIST()
- ;   SELECT()
- ;   UP()
- ;   TOP()
- ;
- ; Allan S. Finkelstein
- ; July 2026
- ;---------------------------------------------------------
- ;
-EN ; Launch KIDS Explorer
- NEW ROOT
- S ROOT=""
- D START^WVECNAV("WVECKIDS",ROOT)
+EN ;
+ D START^WVECNAV("WVECKIDS")
  Q
  ;
-TITLE(CTX) ; Return screen title
- I $G(CTX("MODE"))="MENU" Q "KIDS Build Menu"
- Q "KIDS Explorer"
- ;
-INIT(CTX) ; Initialize provider
- K CTX("STACK")
- S CTX("LEVEL")=0
- S CTX("MODE")="LIST"
- S CTX("PAGE")=1
- K CTX("BUILD")
+INIT ;
+ K ^TMP($J,"WVECNAV","KIDS")
+ S ^TMP($J,"WVECNAV","KIDS","MODE")="BUILDS"
  Q
  ;
-LIST(CTX,LIST,COUNT) ; Build current list
- NEW IEN,NAME,U
- S U="^"
-
- K LIST
+BUILD ;
+ N MODE
+ D CLEAR^WVECWS
+ S MODE=$G(^TMP($J,"WVECNAV","KIDS","MODE"),"BUILDS")
+ I MODE="BUILDS" D BUILDBLDS Q
+ I MODE="TYPES" D BUILDTYPES Q
+ I MODE="ENTRIES" D BUILDENTS Q
+ I MODE="DETAIL" D BUILDDET Q
+ Q
+ ;
+BUILDBLDS ;
+ N IEN,NAME,COUNT
+ S COUNT=0,IEN=0
+ F  S IEN=$O(^XPD(9.6,IEN)) Q:'IEN  D
+ . S NAME=$P($G(^XPD(9.6,IEN,0)),U)
+ . Q:NAME=""
+ . S COUNT=COUNT+1
+ . D ADDITEM^WVECWS(COUNT,NAME,"","BUILD",IEN)
+ D SETSTATE^WVECWS("COUNT",COUNT)
+ Q
+ ;
+BUILDTYPES ;
+ N BUILD,FILE,COUNT,NAME
+ S BUILD=+$G(^TMP($J,"WVECNAV","KIDS","BUILD"))
  S COUNT=0
-
- I $G(CTX("MODE"))="LIST" D  Q
- . S IEN=0
- . F  S IEN=$O(^XPD(9.6,IEN)) Q:'IEN  D
- . . S NAME=$P($G(^XPD(9.6,IEN,0)),U)
- . . Q:NAME=""
- . . S COUNT=COUNT+1
- . . S LIST(COUNT)=NAME
-
- I $G(CTX("MODE"))="MENU" D
- . S COUNT=4
- . S LIST(1)="Header"
- . S LIST(2)="Required Builds"
- . S LIST(3)="Package File"
- . S LIST(4)="Back"
+ S FILE=0
+ F  S FILE=$O(^XPD(9.6,BUILD,"KRN",FILE)) Q:'FILE  D
+ . Q:'$D(^XPD(9.6,BUILD,"KRN",FILE))
+ . S NAME=$$TYPENAME(FILE)
+ . Q:NAME=""
+ . S COUNT=COUNT+1
+ . D ADDITEM^WVECWS(COUNT,NAME,"","TYPE",FILE)
+ D SETSTATE^WVECWS("COUNT",COUNT)
  Q
  ;
-SELECT(CTX,ITEM) ; Handle selection
-
- I $G(CTX("MODE"))="LIST" D  Q
- . S CTX("BUILD")=ITEM
- . S CTX("MODE")="MENU"
- . D PUSH^WVECNAV(.CTX,ITEM)
-
- I ITEM="Back" D  Q
- . D POP^WVECNAV(.CTX)
- . S CTX("MODE")="LIST"
-
- I ITEM="Header" D  Q
- . N IEN
- . S IEN=$O(^XPD(9.6,"B",CTX("BUILD"),0))
- . W !!
- . W "Build: ",CTX("BUILD"),!
- . I IEN>0 W $G(^XPD(9.6,IEN,0)),!
- . R !!,"Press ENTER to continue...",X
-
- I ITEM="Required Builds" D  Q
- . W !!
- . W "Required Build display not yet implemented."
- . R !!,"Press ENTER to continue...",X
-
- I ITEM="Package File" D  Q
- . W !!
- . W "Package information not yet implemented."
- . R !!,"Press ENTER to continue...",X
-
+BUILDENTS ;
+ N BUILD,FILE,N,COUNT,X
+ S BUILD=+$G(^TMP($J,"WVECNAV","KIDS","BUILD"))
+ S FILE=+$G(^TMP($J,"WVECNAV","KIDS","FILE"))
+ S COUNT=0,N=0
+ F  S N=$O(^XPD(9.6,BUILD,"KRN",FILE,"NM",N)) Q:'N  D
+ . S X=$G(^XPD(9.6,BUILD,"KRN",FILE,"NM",N,0))
+ . Q:X=""
+ . S COUNT=COUNT+1
+ . D ADDITEM^WVECWS(COUNT,$P(X,U),"","ENTRY",N)
+ D SETSTATE^WVECWS("COUNT",COUNT)
  Q
  ;
-UP(CTX) ; Navigate up
- I $G(CTX("MODE"))="MENU" D
- . D POP^WVECNAV(.CTX)
- . S CTX("MODE")="LIST"
+BUILDDET ;
+ N BUILD,FILE,ENTRY,X
+ S BUILD=+$G(^TMP($J,"WVECNAV","KIDS","BUILD"))
+ S FILE=+$G(^TMP($J,"WVECNAV","KIDS","FILE"))
+ S ENTRY=+$G(^TMP($J,"WVECNAV","KIDS","ENTRY"))
+ S X=$G(^XPD(9.6,BUILD,"KRN",FILE,"NM",ENTRY,0))
+ D ADDITEM^WVECWS(1,"Name: "_$P(X,U),"","PROP",$P(X,U))
+ D ADDITEM^WVECWS(2,"Data: "_X,"","PROP",X)
+ D SETSTATE^WVECWS("COUNT",2)
  Q
  ;
-TOP(CTX) ; Return to top
- K CTX("STACK")
- S CTX("LEVEL")=0
- S CTX("MODE")="LIST"
- K CTX("BUILD")
- S CTX("PAGE")=1
+OPEN(NUMBER) ;
+ N MODE,VALUE
+ S MODE=$G(^TMP($J,"WVECNAV","KIDS","MODE"),"BUILDS")
+ S VALUE=$$DATA^WVECWS(NUMBER)
+ ;
+ I MODE="BUILDS" D  Q
+ . S ^TMP($J,"WVECNAV","KIDS","BUILD")=VALUE
+ . S ^TMP($J,"WVECNAV","KIDS","MODE")="TYPES"
+ ;
+ I MODE="TYPES" D  Q
+ . S ^TMP($J,"WVECNAV","KIDS","FILE")=VALUE
+ . S ^TMP($J,"WVECNAV","KIDS","MODE")="ENTRIES"
+ ;
+ I MODE="ENTRIES" D  Q
+ . S ^TMP($J,"WVECNAV","KIDS","ENTRY")=VALUE
+ . S ^TMP($J,"WVECNAV","KIDS","MODE")="DETAIL"
+ ;
  Q
+ ;
+UP ;
+ N MODE
+ S MODE=$G(^TMP($J,"WVECNAV","KIDS","MODE"))
+ ;
+ I MODE="DETAIL" D  Q
+ . K ^TMP($J,"WVECNAV","KIDS","ENTRY")
+ . S ^TMP($J,"WVECNAV","KIDS","MODE")="ENTRIES"
+ ;
+ I MODE="ENTRIES" D  Q
+ . K ^TMP($J,"WVECNAV","KIDS","FILE")
+ . S ^TMP($J,"WVECNAV","KIDS","MODE")="TYPES"
+ ;
+ I MODE="TYPES" D  Q
+ . K ^TMP($J,"WVECNAV","KIDS","BUILD")
+ . S ^TMP($J,"WVECNAV","KIDS","MODE")="BUILDS"
+ ;
+ Q
+ ;
+TOP ;
+ D INIT
+ Q
+ ;
+REFRESH ;
+ Q
+ ;
+HEADER ;
+ N MODE,BUILD
+ S MODE=$G(^TMP($J,"WVECNAV","KIDS","MODE"),"BUILDS")
+ ;
+ W @IOF
+ W !,"============================================================"
+ W !,"                  WVEC KIDS Explorer"
+ W !,"============================================================"
+ ;
+ I MODE'="BUILDS" D
+ . S BUILD=+$G(^TMP($J,"WVECNAV","KIDS","BUILD"))
+ . W !,"Build: ",$P($G(^XPD(9.6,BUILD,0)),U)
+ ;
+ W !
+ Q
+ ;
+TYPENAME(FILE) ;
+ N NAME
+ S NAME=$P($G(^DIC(FILE,0)),U)
+ I NAME'="" Q NAME
+ Q "KIDS Component"
  ;
 VERSION() ;
- Q "5.2"
- ;
+ Q "3.0"
