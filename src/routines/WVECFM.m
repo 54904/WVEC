@@ -235,6 +235,7 @@ OPEN(NUMBER) ;
  . D SETPAGE^WVECNAV(1)
 
  I ITEMTYPE="POINTER" D  Q
+ . S ^TMP($J,"WVECNAV","FM","PARENT")=$G(^TMP($J,"WVECNAV","FM","FILE"))
  . K ^TMP($J,"WVECNAV","FM","FIELD")
  . S ^TMP($J,"WVECNAV","FM","MODE")="FIELDS"
  . S ^TMP($J,"WVECNAV","FM","FILE")=VALUE
@@ -262,7 +263,7 @@ OPEN(NUMBER) ;
  Q
  ;
 FIND ; Find File or Field
- N MODE,TEXT,UPTEXT,MATCH,POS,FILE,NAME,FIELD,ZERO
+ N MODE,TEXT,UPTEXT,MATCH,POS,FILE,NAME,FIELD,ZERO,I
  ;
  S MODE=$G(^TMP($J,"WVECNAV","FM","MODE"),"FILES")
  R !!,"Find: ",TEXT:300
@@ -271,17 +272,22 @@ FIND ; Find File or Field
  S UPTEXT=$$UP^XLFSTR(TEXT)
  S MATCH=0
  S POS=0
- ;
  I MODE="FILES" D  Q
+ . N FILEMATCH,ITEM
+ . S FILEMATCH=0
  . S FILE=0
- . F  S FILE=$O(^DIC(FILE)) Q:'FILE  D  Q:MATCH
+ . F  S FILE=$O(^DIC(FILE)) Q:'FILE  D  Q:FILEMATCH
  . . S NAME=$P($G(^DIC(FILE,0)),U)
  . . Q:NAME=""
- . . S POS=POS+1
- . . I (FILE=+TEXT)!(NAME[UPTEXT) D
- . . . S MATCH=FILE
- . . . D SETPAGE^WVECNAV(((POS-1)\$$SIZE^WVECNAV())+1)
- . I 'MATCH W !,"Not found." H 2
+ . . I (FILE=+TEXT)!(NAME[UPTEXT) S FILEMATCH=FILE
+ . I 'FILEMATCH W !,"Not found." H 2 Q
+ . S MATCH=0
+ . S ITEM=0
+ . F  S ITEM=$O(^TMP($J,"WVEC","LIST",ITEM)) Q:'ITEM  D  Q:MATCH
+ . . I $$DATA^WVECWS(ITEM)=FILEMATCH S MATCH=ITEM
+ . I 'MATCH W !,"File found but workspace item not located." H 2 Q
+ . D SETPAGE^WVECNAV(((MATCH-1)\$$SIZE^WVECNAV())+1)
+ . D OPEN^WVECFM(MATCH)
  ;
  I MODE="FIELDS" D  Q
  . S FILE=+$G(^TMP($J,"WVECNAV","FM","FILE"))
@@ -293,10 +299,16 @@ FIND ; Find File or Field
  . . S NAME=$P(ZERO,U)
  . . Q:NAME=""
  . . S POS=POS+1
- . . I (FIELD=TEXT)!(NAME[UPTEXT) D
- . . . S MATCH=FIELD
- . . . D SETPAGE^WVECNAV(((POS-1)\$$SIZE^WVECNAV())+1)
- . I 'MATCH W !,"Not found." H 2
+ . . I (FIELD=TEXT)!(NAME[UPTEXT) S MATCH=FIELD
+ . I 'MATCH W !,"Not found." H 2 Q
+ . ;
+ . ; Locate the matching workspace item.
+ . S I=0
+ . F  S I=$O(^TMP($J,"WVEC","LIST",I)) Q:'I  D  Q:MATCH=I
+ . . I $$DATA^WVECWS(I)=FIELD S MATCH=I
+ . I 'MATCH W !,"Field found but workspace item not located." H 2 Q
+ . D SETPAGE^WVECNAV(((MATCH-1)\$$SIZE^WVECNAV())+1)
+ . D OPEN^WVECFM(MATCH)
  ;
  W !,"Find is not available in this mode." H 2
  Q
