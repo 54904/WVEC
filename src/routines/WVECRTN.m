@@ -8,7 +8,7 @@ WVECRTN ; WorldVistA Routine Explorer Provider
  ;
 
 EN ;
- D START^WVECNAV("WVECRTN","")
+ D START^WVECNAV("WVECRTN")
  Q
 
 TITLE(CTX) ;
@@ -18,29 +18,20 @@ INIT(CTX) ;
  K CTX("ROUTINE")
  S CTX("PAGE")=1
  Q
-
 LIST(CTX,LIST,COUNT) ;
  ;
- N RTNDIR,PATTERN,FILE,NAME
-
+ N X
+ ;
  K LIST
  S COUNT=0
-
- ; Obtain routine directory
- S RTNDIR=$$RTNDIR^%ZOSV()
-
- ; Enumerate every M routine
- S PATTERN=RTNDIR_"*.m"
-
- S FILE=$ZSEARCH(PATTERN)
-
- F  Q:FILE=""  D
- . S NAME=$$NAME(FILE)
- . I NAME'="" D
- . . S COUNT=COUNT+1
- . . S LIST(COUNT)=NAME
- . S FILE=$ZSEARCH(PATTERN)
-
+ K %ZR
+ D SILENT^%RSEL("*","SRC")
+ ;
+ S X=""
+ F  S X=$O(%ZR(X)) Q:X=""  D
+ . S COUNT=COUNT+1
+ . S LIST(COUNT)=X
+ ;
  Q
 
 SELECT(CTX,ITEM) ;
@@ -98,20 +89,40 @@ BUILD ; Build Workspace
  D SETSTATE^WVECWS("COUNT",COUNT)
 
  Q
-OPEN(NUMBER) ; Open Selected Item
+OPEN(NUMBER) ;
  N RTN
-
  S RTN=$$DISPLAY^WVECWS(NUMBER)
  Q:RTN=""
 
  S ^TMP($J,"WVECM","ROUTINE")=RTN
+ S ^TMP($J,"WVECM","MODE")="MENU"
+ S ^TMP($J,"WVECM","PARENT")="WVECRTN"
  K ^TMP($J,"WVECM","LABEL")
 
  S ^TMP($J,"WVECNAV","TYPE")="WVECM"
-
- D INIT^WVECM
+ D SETPAGE^WVECNAV(1)
  S ^TMP($J,"WVECNAV","DIRTY")=1
+
+ D LIST^WVECM
  Q
+ ;
+FIND ; Find Routine
+ D BUILD
+ N TEXT,I,X,MATCH,PAGE,SIZE
+ R !!,"Find: ",TEXT:300
+ Q:TEXT=""
+ S TEXT=$$UP^XLFSTR(TEXT)
+ S MATCH=0
+ F I=1:1:$$COUNT^WVECWS() D  Q:MATCH
+ . S X=$$DISPLAY^WVECWS(I)
+ . I $$UP^XLFSTR(X)[TEXT S MATCH=I
+ I 'MATCH W !,"Not found." H 2 Q
+ S SIZE=+$G(^TMP($J,"WVECNAV","SIZE"))
+ I SIZE<1 S SIZE=20
+ S PAGE=((MATCH-1)\SIZE)+1
+ D SETPAGE^WVECNAV(PAGE)
+ Q
+ ;
 
 HEADER ; Display Header
  W @IOF

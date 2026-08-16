@@ -148,6 +148,10 @@ UP ; Navigate Up
  . S ^TMP($J,"WVECM","MODE")="MENU"
  . D LIST
  ;
+ I MODE="MENU",$G(^TMP($J,"WVECM","PARENT"))="WVECRTN" D  Q
+ . K ^TMP($J,"WVECM")
+ . S ^TMP($J,"WVECNAV","TYPE")="WVECRTN"
+ . D INIT^WVECRTN
  I MODE="MENU" D  Q
  . K ^TMP($J,"WVECM","ROUTINE")
  . K ^TMP($J,"WVECM","LABEL")
@@ -359,26 +363,30 @@ SOURCE ; Display Source
  ;
  Q
 FIND ; Find Text
-
- N TEXT,I,X,MATCH,PAGE
-
- Q:$G(^TMP($J,"WVECM","MODE"))'="SOURCE"
-
+ N MODE,TEXT,I,X,MATCH,PAGE
+ S MODE=$G(^TMP($J,"WVECM","MODE"),"ROUTINES")
  R !!,"Find: ",TEXT:300
-
  Q:TEXT=""
-
  S TEXT=$$UP^XLFSTR(TEXT)
  S MATCH=0
 
- F I=1:1:$$COUNT^WVECWS() D  Q:MATCH
- . S X=$$DISPLAY^WVECWS(I)
- . I $$UP^XLFSTR(X)[TEXT S MATCH=I
+ I MODE="ROUTINES" D  Q
+ . F I=1:1:$$COUNT^WVECWS() D  Q:MATCH
+ . . S X=$$DISPLAY^WVECWS(I)
+ . . I $$UP^XLFSTR(X)[TEXT S MATCH=I
+ . I 'MATCH W !,"Not found." H 2 Q
+ . S PAGE=((MATCH-1)\$$SIZE^WVECNAV())+1
+ . D SETPAGE^WVECNAV(PAGE)
+ Q
 
- I 'MATCH W !,"Not found." H 2 Q
+ I MODE="SOURCE" D  Q
+ . F I=1:1:$$COUNT^WVECWS() D  Q:MATCH
+ . . S X=$$DISPLAY^WVECWS(I)
+ . . I $$UP^XLFSTR(X)[TEXT S MATCH=I
+ . I 'MATCH W !,"Not found." H 2 Q
+ . S PAGE=((MATCH-1)\$$SIZE^WVECNAV())+1
+ . D SETPAGE^WVECNAV(PAGE)
+ Q
 
- S PAGE=((MATCH-1)\$$SIZE^WVECNAV())+1
-
- D SETPAGE^WVECNAV(PAGE)
-
+ W !,"Find not available in this mode." H 2
  Q
