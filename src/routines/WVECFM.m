@@ -170,14 +170,25 @@ BUILDREFS ;
 
  D SETSTATE^WVECWS("COUNT",COUNT)
  Q
+ ;
 UP ;
  N MODE
 
  S MODE=$G(^TMP($J,"WVECNAV","FM","MODE"))
 
+ I MODE="COMPUTED" D  Q
+ . S ^TMP($J,"WVECNAV","FM","MODE")="FIELD"
+ . D SETPAGE^WVECNAV(1)
+
+ I MODE="REFS" D  Q
+ . S ^TMP($J,"WVECNAV","FM","MODE")="FIELD"
+ . D SETPAGE^WVECNAV(1)
+
  I MODE="FIELD" D  Q
  . K ^TMP($J,"WVECNAV","FM","FIELD")
  . S ^TMP($J,"WVECNAV","FM","MODE")="FIELDS"
+ . D SETPAGE^WVECNAV(1)
+
  I MODE="FIELDS",$D(^TMP($J,"WVECNAV","FM","PARENT")) D  Q
  . S ^TMP($J,"WVECNAV","FM","FILE")=^TMP($J,"WVECNAV","FM","PARENT")
  . K ^TMP($J,"WVECNAV","FM","PARENT")
@@ -190,7 +201,6 @@ UP ;
  . D SETPAGE^WVECNAV(1)
 
  Q
- ;
 TOP ;
  K ^TMP($J,"WVECNAV","FM")
  S ^TMP($J,"WVECNAV","FM","MODE")="FILES"
@@ -288,6 +298,7 @@ FIND ; Find File or Field
  . I 'MATCH W !,"File found but workspace item not located." H 2 Q
  . D SETPAGE^WVECNAV(((MATCH-1)\$$SIZE^WVECNAV())+1)
  . D OPEN^WVECFM(MATCH)
+ . D SETDIRTY^WVECNAV(1)
  ;
  I MODE="FIELDS" D  Q
  . S FILE=+$G(^TMP($J,"WVECNAV","FM","FILE"))
@@ -309,6 +320,7 @@ FIND ; Find File or Field
  . I 'MATCH W !,"Field found but workspace item not located." H 2 Q
  . D SETPAGE^WVECNAV(((MATCH-1)\$$SIZE^WVECNAV())+1)
  . D OPEN^WVECFM(MATCH)
+ . D SETDIRTY^WVECNAV(1)
  ;
  W !,"Find is not available in this mode." H 2
  Q
