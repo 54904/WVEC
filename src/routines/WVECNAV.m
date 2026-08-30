@@ -104,7 +104,7 @@ RENDER ; Render Current Workspace
  W !!
  W "------------------------------------------------------------"
  W !
- W "N Next   P Prev   T Top   U Up   I Inspect   F Find   R Refresh   Q Quit"
+ W "N Next   P Prev   T Top   U Up   I Inspect   F Find   R Refresh "
  D TRACE^WVECDBG("RENDER","EXIT")
 
  Q
@@ -128,9 +128,9 @@ EXEC ; Execute Command
  N CMD
 
  S CMD=$$UP^XLFSTR($G(^TMP($J,"WVECNAV","CMD")))
-
  I CMD="Q" D  Q
- . S ^TMP($J,"WVECNAV","QUIT")=1
+ . W !,"Command not available."
+ . H 1
  I CMD="R" D  Q
  . D SETDIRTY(1)
  I CMD="N" D NEXT Q
