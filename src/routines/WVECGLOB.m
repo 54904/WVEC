@@ -24,7 +24,17 @@ INIT ; Initialize Explorer
  D OPEN^WVECTREE(ROOT)
 
  Q
+JUMP(ROOT) ; Jump directly into Global Explorer
+ ;
+ ; ROOT = starting global (e.g. "^DIC")
+ ;
+ N PATH
+ S PATH=$G(ROOT)
+ I PATH="" Q
 
+ D START^WVECNAV("WVECGLOB",PATH)
+
+ Q
 REFRESH ;
  D LIST
  Q

@@ -18,8 +18,8 @@ WVECFM ; WorldVistA FileMan Explorer Provider
  ;---------------------------------------------------------
  ;
 EN ;
- Q
- ;
+ D START^WVECNAV("WVECFM")
+ Q ;
 INIT ;
  K ^TMP($J,"WVECNAV","FM")
  S ^TMP($J,"WVECNAV","FM","MODE")="FILES"

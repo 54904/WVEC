@@ -30,10 +30,8 @@ OPEN(NUMBER) ;
  I ITEM="Globals" D  Q
  . S ^TMP($J,"WVECNAV","TYPE")="WVECGLOB"
  . D INIT^WVECGLOB
-
  I ITEM="Routines" D  Q
- . S ^TMP($J,"WVECNAV","TYPE")="WVECRTN"
- . D INIT^WVECRTN
+ . D EN^WVECRTN
 
  I ITEM="M Code Analysis" D  Q
  . S ^TMP($J,"WVECNAV","TYPE")="WVECM"

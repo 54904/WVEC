@@ -52,7 +52,9 @@ LIST ; Build display
  I MODE="SOURCE" D SOURCE Q
  I MODE="CALLS" D CALLS Q
  I MODE="GLOBALS" D GLOBALS Q
+ I MODE="GLOBALUSE" D GLOBALUSE Q
  I MODE="VARIABLES" D VARIABLES Q
+ I MODE="VARUSE" D VARUSE Q
  I MODE="METRICS" D METRICS Q
  ;
  D CLEAR^WVECWS
@@ -117,6 +119,21 @@ OPEN(NUMBER) ; Open Selected Item
  . S ^TMP($J,"WVECM","LABEL")=LBL
  . S ^TMP($J,"WVECM","MODE")="MENU"
  . D LIST
+ I MODE="VARUSE" D  Q
+ . K ^TMP($J,"WVECM","VARIABLE")
+ . S ^TMP($J,"WVECM","MODE")="VARIABLES"
+ . D LIST
+ ; ----- Variables List -----
+ ; ----- Globals List -----
+ I MODE="GLOBALS" D  Q
+ . S ^TMP($J,"WVECM","GLOBAL")=ITEM
+ . S ^TMP($J,"WVECM","MODE")="GLOBALUSE"
+ . D LIST
+ ;
+ I MODE="VARIABLES" D  Q
+ . S ^TMP($J,"WVECM","VARIABLE")=ITEM
+ . S ^TMP($J,"WVECM","MODE")="VARUSE"
+ . D LIST
  Q
 SELECT(NUMBER)
  Q 1
@@ -140,6 +157,14 @@ UP ; Navigate Up
  . D LIST
  I MODE="LABELS" D  Q
  . S ^TMP($J,"WVECM","MODE")="MENU"
+ . D LIST
+ I MODE="GLOBALUSE" D  Q
+ . K ^TMP($J,"WVECM","GLOBAL")
+ . S ^TMP($J,"WVECM","MODE")="GLOBALS"
+ . D LIST
+ I MODE="VARUSE" D  Q
+ . K ^TMP($J,"WVECM","VARIABLE")
+ . S ^TMP($J,"WVECM","MODE")="VARIABLES"
  . D LIST
  I MODE="VARIABLES" D  Q
  . S ^TMP($J,"WVECM","MODE")="MENU"
@@ -169,7 +194,7 @@ REFRESH
 
 HEADER ; Display Header
  ;
- N MODE,RTN,LABEL
+ N MODE,RTN,LABEL,VAR
  ;
  S MODE=$G(^TMP($J,"WVECM","MODE"),"ROUTINES")
  ;
@@ -213,10 +238,24 @@ HEADER ; Display Header
  . W !,"Routine  : ",RTN
  . W !
  ;
+ I MODE="GLOBALUSE" D  Q
+ . S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
+ . W !,"Location : Global Usage"
+ . W !,"Routine  : ",RTN
+ . W !,"Global   : ",$G(^TMP($J,"WVECM","GLOBAL"))
+ . W !
+ ;
  I MODE="VARIABLES" D  Q
  . S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
  . W !,"Location : Variables"
  . W !,"Routine  : ",RTN
+ . W !
+ I MODE="VARUSE" D  Q
+ . S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
+ . S VAR=$G(^TMP($J,"WVECM","VARIABLE"))
+ . W !,"Location : Variable Usage"
+ . W !,"Routine  : ",RTN
+ . W !,"Variable : ",VAR
  . W !
  I MODE="METRICS" D  Q
  . S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
@@ -377,6 +416,7 @@ FIND ; Find Text
  . I 'MATCH W !,"Not found." H 2 Q
  . S PAGE=((MATCH-1)\$$SIZE^WVECNAV())+1
  . D SETPAGE^WVECNAV(PAGE)
+ . D SETDIRTY^WVECNAV(1)
  Q
 
  I MODE="SOURCE" D  Q
@@ -386,7 +426,50 @@ FIND ; Find Text
  . I 'MATCH W !,"Not found." H 2 Q
  . S PAGE=((MATCH-1)\$$SIZE^WVECNAV())+1
  . D SETPAGE^WVECNAV(PAGE)
+ . D SETDIRTY^WVECNAV(1)
  Q
 
  W !,"Find not available in this mode." H 2
+ Q
+GLOBALUSE ; Build Global Usage List
+ N RTN,GBL,I,LINE,CNT
+
+ S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
+ S GBL=$G(^TMP($J,"WVECM","GLOBAL"))
+
+ D CLEAR^WVECWS
+
+ S CNT=0
+
+ F I=1:1 D  Q:LINE=""
+ . S LINE=$T(+I^@RTN)
+ . Q:LINE=""
+ . I LINE[GBL D
+ . . S CNT=CNT+1
+ . . D ADDITEM^WVECWS(CNT,$J(I,5)_"  "_LINE,"","S","")
+
+ D SETSTATE^WVECWS("TITLE","Global: "_GBL)
+ D SETSTATE^WVECWS("COUNT",CNT)
+
+ Q
+VARUSE ; Build Variable Usage List
+ N RTN,VAR,I,LINE,CNT
+
+ S RTN=$G(^TMP($J,"WVECM","ROUTINE"))
+ S VAR=$G(^TMP($J,"WVECM","VARIABLE"))
+
+ D CLEAR^WVECWS
+
+ S CNT=0
+
+ F I=1:1 D  Q:LINE=""
+ . S LINE=$T(+I^@RTN)
+ . Q:LINE=""
+ . I LINE[VAR D
+ . . S CNT=CNT+1
+ . . D ADDITEM^WVECWS(CNT,$J(I,5)_" "_LINE,"","S","")
+
+ D SETSTATE^WVECWS("TITLE","Variable: "_VAR)
+ D SETSTATE^WVECWS("COUNT",CNT)
+
  Q
