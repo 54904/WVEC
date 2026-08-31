@@ -1,0 +1,11 @@
+WVECSTART ; WVEC ttyd startup
+ ;;1.0
+
+ S U="^"
+ S IOF="#,$C(27,91,50,74,27,91,72)"
+S DUZ=8
+
+S ^TMP($J,"WVECSTART","ROOT")="^DIC"
+
+D START^WVECNAV("WVECGLOB")
+ Q

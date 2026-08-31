@@ -18,7 +18,10 @@ INIT ; Initialize Explorer
  ;
  N ROOT
 
- S ROOT=$$SELECT^WVECROOT()
+ S ROOT=$G(^TMP($J,"WVECSTART","ROOT"))
+
+ I ROOT="" S ROOT=$$SELECT^WVECROOT()
+
  I ROOT="" Q
 
  D OPEN^WVECTREE(ROOT)
