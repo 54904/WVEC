@@ -7,7 +7,7 @@ WVECNAV ; WorldVistA Engineering Console Navigator
 
 START(TYPE) ;
  D INIT(TYPE)
-
+ D TRACE^WVECDBG("START","ENTER TYPE="_$G(TYPE))
  F  Q:$$QUIT()  D
  . I $$DIRTY() D BUILD
  . D RENDER
@@ -104,7 +104,7 @@ RENDER ; Render Current Workspace
  W !!
  W "------------------------------------------------------------"
  W !
- W "N Next   P Prev   T Top   U Up   I Inspect   F Find   R Refresh "
+ W "N Next   P Prev   T Top   U Up   I Inspect   F Find   J Jump   R Refresh "
  D TRACE^WVECDBG("RENDER","EXIT")
 
  Q
@@ -126,8 +126,9 @@ EXEC ; Execute Command
  ;
 
  N CMD
-
+ D TRACE^WVECDBG("EXEC","RAW="_$G(^TMP($J,"WVECNAV","CMD")))
  S CMD=$$UP^XLFSTR($G(^TMP($J,"WVECNAV","CMD")))
+ D TRACE^WVECDBG("EXEC","CMD="_CMD)
  I CMD="Q" D  Q
  . W !,"Command not available."
  . H 1
@@ -139,7 +140,10 @@ EXEC ; Execute Command
  I CMD="U" D UP Q
  I CMD="I" D INSPECT^WVECPROV($$TYPE()) Q
  I CMD="F" D FIND^WVECPROV($$TYPE()) Q
- I CMD?1.N D ENTER(+CMD) Q
+ I CMD="J" D JUMPGLOB^WVECGLOB Q
+ I CMD?1.N D  Q
+ . D TRACE^WVECDBG("EXEC","NUMERIC="_CMD)
+ . D ENTER(+CMD)
  Q
 
 NEXT ; Next Page
@@ -167,12 +171,14 @@ UP ; Up One Level
  Q
 
 ENTER(NUMBER) ; Enter Selected Item
- S ^TMPXX($J,"NAV","TYPE")=$$TYPE()
- S ^TMPXX($J,"NAV","NUMBER")=NUMBER
- S ^TMPXX($J,"NAV","BEFORE")=1
+ D TRACE^WVECDBG("ENTER","NUMBER="_NUMBER)
+
+ D TRACE^WVECDBG("ENTER","BEFORE OPEN")
  D OPEN^WVECPROV($$TYPE(),NUMBER)
- S ^TMPXX($J,"NAV","AFTER")=1
+ D TRACE^WVECDBG("ENTER","AFTER OPEN")
+
  D SETDIRTY(1)
+ D TRACE^WVECDBG("ENTER","DIRTY SET")
 
  Q
 

@@ -130,6 +130,15 @@ OPEN(NUMBER) ; Open Selected Item
  . S ^TMP($J,"WVECM","MODE")="GLOBALUSE"
  . D LIST
  ;
+ I MODE="GLOBALUSE" D  Q
+ . N ROOT,X
+ . S ROOT=$G(^TMP($J,"WVECM","GLOBAL"))
+ . I ROOT["$J" D  Q
+ . . W !!,"Cannot directly explore variable-based globals."
+ . . W !,"Press RETURN: "
+ . . R X:300
+ . S ^TMP($J,"WVECSTART","ROOT")=ROOT
+ . D START^WVECNAV("WVECGLOB")
  I MODE="VARIABLES" D  Q
  . S ^TMP($J,"WVECM","VARIABLE")=ITEM
  . S ^TMP($J,"WVECM","MODE")="VARUSE"

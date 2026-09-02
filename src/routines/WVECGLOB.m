@@ -17,12 +17,9 @@ WVECGLOB ; WorldVistA Engineering Console Global Provider
 INIT ; Initialize Explorer
  ;
  N ROOT
-
  S ROOT=$G(^TMP($J,"WVECSTART","ROOT"))
 
- I ROOT="" S ROOT=$$SELECT^WVECROOT()
-
- I ROOT="" Q
+ I ROOT="" S ROOT="^DIC"
 
  D OPEN^WVECTREE(ROOT)
 
@@ -52,13 +49,18 @@ LIST ;
 
  S REF=$$CURRENT^WVECTREE()
  D SETTITLE^WVECWS("WVEC Global Browser")
+
  D SETSUB^WVECWS("Globals")
+
  D SETSTATUS^WVECWS("Current: "_REF)
  D SETCOMMANDS^WVECWS("N P U T Q")
-
  S SUB=""
  S COUNT=0
 
+ S SUB=""
+ S SUB=$O(@REF@(""))
+
+ S SUB=""
  F  S SUB=$O(@REF@(SUB)) Q:SUB=""  D
  . S COUNT=COUNT+1
  . S NODE=$$CHILD^WVECREF(REF,SUB)
@@ -156,6 +158,18 @@ FIND ; Find Immediate Child
  D SETPAGE^WVECNAV(PAGE)
  Q
  ;
+JUMPGLOB ; Jump To Another Global
+ N ROOT
+
+ R !!,"Global: ",ROOT:300
+ Q:ROOT=""
+
+ I $E(ROOT)'="^" S ROOT="^"_ROOT
+
+ D OPEN^WVECTREE(ROOT)
+ D LIST
+
+ Q
 
 TEST ;
  D INIT
