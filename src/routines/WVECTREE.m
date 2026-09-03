@@ -42,14 +42,11 @@ OPEN(ROOT) ;
  ; Open a new tree.
  ;
  D INIT
- W !,"OPEN ROOT=",ROOT
 
  I $E(ROOT,$L(ROOT))="(" S ROOT=$E(ROOT,1,$L(ROOT)-1)
 
- W !,"NORMALIZED ROOT=",ROOT
 
  S ^TMP($J,"WVEC","TREE","ROOT")=ROOT
- W !,"STORED ROOT=",^TMP($J,"WVEC","TREE","ROOT")
  S ^TMP($J,"WVEC","TREE","LEVEL")=0
  D UPDATE
  Q
@@ -139,26 +136,3 @@ SHOW ;
  W "Path    : ",$$PATH(),!
  Q
 
-TEST ;
- D OPEN("^DIC")
-
- W !!,"*** INITIAL ***"
- D SHOW
-
- W !!,"*** OPENNODE 4 ***"
- D OPENNODE(4)
- D SHOW
-
- W !!,"*** OPENNODE ""B"" ***"
- D OPENNODE("B")
- D SHOW
-
- W !!,"*** POP ***"
- D POP
- D SHOW
-
- W !!,"*** TOP ***"
- D TOP
- D SHOW
-
- Q
