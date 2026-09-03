@@ -80,7 +80,7 @@ BUILD ; Build Workspace
  D LIST
  Q
 
-OPEN(NUMBER) ; Open Selected Item
+OPEN(NUMBER) ;
  ;
  N MODE,ITEM,X
  ;
@@ -132,18 +132,26 @@ OPEN(NUMBER) ; Open Selected Item
  ;
  I MODE="GLOBALUSE" D  Q
  . N ROOT,X
+ .
  . S ROOT=$G(^TMP($J,"WVECM","GLOBAL"))
+ .
+ . ; normalize partial references from XINDEX
+ . I $E(ROOT,$L(ROOT))="(" S ROOT=$E(ROOT,1,$L(ROOT)-1)
+ . I ROOT["(",$E(ROOT,$L(ROOT))'=")" S ROOT=ROOT_")"
+ .
  . I ROOT["$J" D  Q
  . . W !!,"Cannot directly explore variable-based globals."
  . . W !,"Press RETURN: "
  . . R X:300
+ .
  . S ^TMP($J,"WVECSTART","ROOT")=ROOT
+ .
+ . ; launch Global Explorer on the selected global
  . D START^WVECNAV("WVECGLOB")
  I MODE="VARIABLES" D  Q
  . S ^TMP($J,"WVECM","VARIABLE")=ITEM
  . S ^TMP($J,"WVECM","MODE")="VARUSE"
  . D LIST
- Q
 SELECT(NUMBER)
  Q 1
 
