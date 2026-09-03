@@ -33,9 +33,7 @@ MAIN ;
  S DONE=0
 
  F  Q:DONE  D
- . W !!,"*** ENTERING SHOW^WVECDSP ***",!
  . D SHOW^WVECDSP
- . W !,"*** RETURNED FROM SHOW^WVECDSP ***",!!
  . D READ^WVECCMD
  . D EXEC(.DONE)
 
