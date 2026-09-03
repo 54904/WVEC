@@ -120,15 +120,11 @@ SELECT(NUM) ; Validate and open selected node
  S ^TMPXX($J,"SUB")=SUB
  S ^TMPXX($J,"TYPE")=TYPE
  S ^TMPXX($J,"DATA")=$G(^TMP($J,"WVEC","LIST",NUM,"DATA"))
-
  I SUB="" Q 0
-
  D OPENNODE^WVECTREE(SUB)
 
- I TYPE=1 D SHOW^WVECNODE
-
+ I TYPE=1 D SHOW^WVECNODE D POP^WVECTREE Q 1
  Q 1
-
 OPEN(NUM) ; Open Selected Item
  D ENTER(NUM)
  Q
